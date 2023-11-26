@@ -1,3 +1,5 @@
+import javax.swing.*;
+
 public class Main {
 
     //<editor-fold desc="Scaffolding Variables">
@@ -44,12 +46,22 @@ public class Main {
     public static boolean debug = false;
     //</editor-fold>
 
+    static volatile Grid grid;
+
     /**
      * Specs: https://gee.cs.oswego.edu/dl/csc375/a3V2.html
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         setInputVars(args);
+
+        grid = new Grid(height, width);
+        setGui();
+
+        for(;;) {
+            Thread.sleep(1000);
+            grid = new Grid(height, width);
+        }
     }
 
     /**
@@ -98,5 +110,34 @@ public class Main {
         System.out.println("Height: " + height);
         System.out.println("Width: " + width);
         System.out.println("Threshold: " + threshold);
+    }
+
+
+    /**
+     * Sets up the GUI and gets it rolling.
+     */
+    private static void setGui() {
+        Gui gui = new Gui(60, 10, 0, 0);
+
+        //Thank you to Scarlett Weeks for the original.
+        //Pulled and tweaked from my project 1 code.
+        SwingUtilities.invokeLater(() -> {
+            JFrame window = new JFrame();
+            window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+            //Roll with the block offset here, it's annoying but this gets the job done.
+            int fullWidth = (gui.blockLength * width) + gui.blockOffset * 6;
+            int fullHeight = (gui.blockLength * height) + gui.blockOffset * 6;
+
+            window.setBounds(0, 0, fullWidth, fullHeight);
+
+            window.getContentPane().add(gui);
+            window.setVisible(true);
+        });
+
+        //The actual thing that makes sure the display updates.
+        new Timer(1,
+                event->gui.repaint()
+        ).start();
     }
 }
