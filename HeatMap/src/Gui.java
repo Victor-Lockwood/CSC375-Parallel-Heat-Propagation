@@ -31,10 +31,21 @@ public class Gui extends JPanel {
             for(int j = 0; j < cellLine.length; j++) {
                 int currentX = startX + (blockLength * j);
 
-                switch (cellLine[j].Color) {
-                    case 'A' -> graphics.setColor(Color.red);
-                    case 'D' -> graphics.setColor(Color.magenta);
-                    default -> graphics.setColor(Color.blue);
+                if(cellLine[j].temperature < 20) {
+                    //Cold
+                    graphics.setColor(Color.blue);
+                } else if(cellLine[j].temperature < 40) {
+                    //Warm
+                    graphics.setColor(Color.yellow);
+                } else if(cellLine[j].temperature < 60) {
+                    //Hot
+                    graphics.setColor(Color.orange);
+                } else if(cellLine[j].temperature < 80) {
+                    //Hotter
+                    graphics.setColor(Color.red);
+                } else {
+                    //Hottest
+                    graphics.setColor(Color.magenta);
                 }
 
                 graphics.fillRect(currentX, currentY, blockLength, blockLength);

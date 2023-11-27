@@ -41,7 +41,7 @@ public class Main {
     /**
      * When to stop iterating.
      */
-    public static double threshold;
+    public static int threshold;
 
     public static boolean debug = false;
     //</editor-fold>
@@ -58,9 +58,9 @@ public class Main {
         grid = new Grid(height, width);
         setGui();
 
-        for(;;) {
+        for(int i = 0; i < threshold; i++) {
             Thread.sleep(1000);
-            grid = new Grid(height, width);
+            grid.calculateNewTemperature();
         }
     }
 
@@ -83,7 +83,7 @@ public class Main {
             C3 = Double.parseDouble(args[4]);
             height = Integer.parseInt(args[5]);
             width = height * 4;
-            threshold = Double.parseDouble(args[6]);
+            threshold = Integer.parseInt(args[6]);
 
             if(args.length > 7) debug = Boolean.parseBoolean(args[7]);
 
