@@ -24,8 +24,8 @@ public class Gui extends JPanel {
         graphics.setColor(Color.red);
         graphics.fillRect(startX + blockLength + blockOffset, startY, blockLength, blockLength);
 
-        for(int i = 0; i < Main.grid.Cells.length; i++) {
-            Grid.Cell[] cellLine = Main.grid.Cells[i];
+        for(int i = 0; i < Main.readGrid.Cells.length; i++) {
+            Grid.Cell[] cellLine = Main.readGrid.Cells[i];
             int currentY = startY + (blockLength * i);
 
             for(int j = 0; j < cellLine.length; j++) {

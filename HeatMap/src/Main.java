@@ -46,7 +46,17 @@ public class Main {
     public static boolean debug = false;
     //</editor-fold>
 
-    static volatile Grid grid;
+    /**
+     * Grid to read from.
+     */
+    static volatile Grid readGrid;
+
+    /**
+     * Grid to write to.
+     */
+    static volatile Grid writeGrid;
+
+    static volatile double highestTemp = 0;
 
     /**
      * Specs: https://gee.cs.oswego.edu/dl/csc375/a3V2.html
@@ -55,13 +65,21 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         setInputVars(args);
 
-        grid = new Grid(height, width);
+        readGrid = new Grid(height, width);
+        writeGrid = new Grid(readGrid);
+
         setGui();
 
         for(int i = 0; i < threshold; i++) {
             Thread.sleep(1000);
-            grid.calculateNewTemperature();
+            readGrid.calculateNewTemperature();
+
+            Grid swapGrid = readGrid;
+            readGrid = writeGrid;
+            writeGrid = swapGrid;
         }
+
+        return;
     }
 
     /**
