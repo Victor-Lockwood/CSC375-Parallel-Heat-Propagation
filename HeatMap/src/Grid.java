@@ -83,8 +83,8 @@ public class Grid {
             double metal1Variation = ThreadLocalRandom.current().nextDouble(.25);
             double metal2Variation = ThreadLocalRandom.current().nextDouble(.25);
 
-            percentM1 = 0.33 * metal1Variation;
-            percentM2 = 0.33 * metal2Variation;
+            percentM1 = 0.33; //* metal1Variation;
+            percentM2 = 0.33; //* metal2Variation;
             percentM3 = 1 - (percentM1 + percentM2);
         }
 
@@ -109,7 +109,6 @@ public class Grid {
          * Calculate a new temperature based on neighbors.
          */
         //TODO: Incomplete
-        //TODO: Needs to follow rotating matrix pattern
         public void calculateNewTemperature() {
             //Don't update if these two cells are the ones where heat is applied.
             //TODO: These can vary randomly over time
@@ -145,20 +144,41 @@ public class Grid {
                 neighbors.add(Main.readGrid.Cells[this.x][this.y + 1]);
             }
 
-            //Loop through our neighbors and aggregate the temperature percentage calculation
-            double aggregatedTemp = 0;
+            //Loop through our metals and aggregate the temperature percentage calculation
+            double resultTemp = 0;
 
-            for(Cell neighbor: neighbors) {
-                aggregatedTemp += neighbor.temperature * neighbor.percentM1;
-                aggregatedTemp += neighbor.temperature * neighbor.percentM2;
-                aggregatedTemp += neighbor.temperature * neighbor.percentM3;
+            //Metal 1
+            double agg1 = 0;
+            for(Cell neighbor : neighbors) {
+                agg1 += neighbor.temperature * neighbor.percentM1;
             }
 
-            //Take that aggregate and for each of the three metals, multiply it by the constant, divide it by the number of neighbors, and
-            //set temperature to the sum of the three results
-            double resultTemp = Main.C1 * aggregatedTemp / neighbors.size();
-            resultTemp = resultTemp + (Main.C2 * aggregatedTemp / neighbors.size());
-            resultTemp = resultTemp + (Main.C3 * aggregatedTemp / neighbors.size());
+            agg1 *= Main.C1;
+
+            resultTemp = resultTemp + agg1/neighbors.size();
+
+            //Metal 2
+            double agg2 = 0;
+            for(Cell neighbor : neighbors) {
+                agg2 += neighbor.temperature * neighbor.percentM2;
+            }
+
+            agg2 *= Main.C2;
+
+            resultTemp = resultTemp + agg2/neighbors.size();
+
+            //Metal 3
+            double agg3 = 0;
+            for(Cell neighbor : neighbors) {
+                agg3 += neighbor.temperature * neighbor.percentM3;
+            }
+
+            agg3 *= Main.C3;
+
+            resultTemp = resultTemp + agg3/neighbors.size();
+
+
+
 
             //We update the temp of the corresponding cell in the WRITE GRID,
             //NOT our local temp.

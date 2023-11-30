@@ -71,7 +71,7 @@ public class Main {
         setGui();
 
         for(int i = 0; i < threshold; i++) {
-            Thread.sleep(1000);
+            Thread.sleep(10);
             readGrid.calculateNewTemperature();
 
             Grid swapGrid = readGrid;
@@ -135,7 +135,7 @@ public class Main {
      * Sets up the GUI and gets it rolling.
      */
     private static void setGui() {
-        Gui gui = new Gui(60, 10, 0, 0);
+        Gui gui = new Gui(10, 10, 0, 0);
 
         //Thank you to Scarlett Weeks for the original.
         //Pulled and tweaked from my project 1 code.
