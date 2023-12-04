@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Grid {
@@ -56,51 +57,73 @@ public class Grid {
      * @param includeEdges
      */
     //TODO: Edges/dividing up grid
-    public void calculateNewTemperature(boolean includeEdges) {
+    public static void calculateNewTemperature(boolean includeEdges, Grid grid) {
 
         if(includeEdges) {
-            int height = this.Cells.length;
-            int width = this.Cells[0].length;
+            int height = grid.Cells.length;
+            int width = grid.Cells[0].length;
 
-            for(Cell[] cellLine: this.Cells) {
+            for(Cell[] cellLine: grid.Cells) {
                 for(Cell cell: cellLine) {
                     cell.calculateNewTemperature();
                 }
             }
         } else {
             //Calculate all cells except the ones along edges
-            int height = this.Cells.length;
-            int width = this.Cells[0].length;
+            int height = grid.Cells.length;
+            int width = grid.Cells[0].length;
 
+            divideAndConquer(grid.Cells);
+        }
+
+        //This is here so I have a spot to put a breakpoint
+        return;
+    }
+
+    static void divideAndConquer(Cell[][] cells) {
+        int height = cells.length;
+        int width = cells[0].length;
+
+
+        if(height > 10) {
+
+            Cell[][] firstHalf = Arrays.copyOfRange(cells, 0, height/2); //new Cell[height/2][width];
+            Cell[][] secondHalf = Arrays.copyOfRange(cells, height/2, height); //new Cell[height/2][width];
+
+
+            divideAndConquer(firstHalf);
+            divideAndConquer(secondHalf);
+        } else {
             //Left
             for(int i = 0; i < (height/2); i ++) {
+                if(cells[i] == null) continue;
                 for(int j = 0; j < (width/2) + 1; j++) {
-                    this.Cells[i][j].calculateNewTemperature();
+                    cells[i][j].calculateNewTemperature();
                 }
             }
 
             for(int i = ((height/2)); i < height; i ++) {
+                if(cells[i] == null) continue;
                 for(int j = 0; j < (width/2); j++) {
-                    this.Cells[i][j].calculateNewTemperature();
+                    cells[i][j].calculateNewTemperature();
                 }
             }
 
             //Right
             for(int i = (height/2); i < height; i ++) {
+                if(cells[i] == null) continue;
                 for(int j = ((width/2)); j < width; j++) {
-                    this.Cells[i][j].calculateNewTemperature();
+                    cells[i][j].calculateNewTemperature();
                 }
             }
 
             for(int i = 0; i < (height/2); i ++) {
+                if(cells[i] == null) continue;
                 for(int j = ((width/2) + 1); j < width; j++) {
-                    this.Cells[i][j].calculateNewTemperature();
+                    cells[i][j].calculateNewTemperature();
                 }
             }
         }
-
-        //This is here so I have a spot to put a breakpoint
-        return;
     }
 
     /**
