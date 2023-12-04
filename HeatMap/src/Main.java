@@ -70,9 +70,11 @@ public class Main {
 
         setGui();
 
+
+
         for(int i = 0; i < threshold; i++) {
             Thread.sleep(10);
-            readGrid.calculateNewTemperature();
+            readGrid.calculateNewTemperature(false);
 
             Grid swapGrid = readGrid;
             readGrid = writeGrid;

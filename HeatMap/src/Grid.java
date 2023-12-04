@@ -3,7 +3,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Grid {
 
-    public final Cell[][] Cells;
+    public Cell[][] Cells;
+
+    public int sector = -1;
+
+    public Grid() {}
 
     /**
      * Make a grid with randomly populated cells.
@@ -37,6 +41,7 @@ public class Grid {
         int height = grid.Cells.length;
         int width = grid.Cells[0].length;
 
+        this.sector = grid.sector;
         this.Cells = new Cell[height][width];
 
         for(int i = 0; i < height; i++) {
@@ -46,10 +51,51 @@ public class Grid {
         }
     }
 
-    public void calculateNewTemperature() {
-        for(Cell[] cellLine: this.Cells) {
-            for(Cell cell: cellLine) {
-                cell.calculateNewTemperature();
+    /**
+     * Calculate the temperature of the whole grid.
+     * @param includeEdges
+     */
+    //TODO: Edges/dividing up grid
+    public void calculateNewTemperature(boolean includeEdges) {
+
+        if(includeEdges) {
+            int height = this.Cells.length;
+            int width = this.Cells[0].length;
+
+            for(Cell[] cellLine: this.Cells) {
+                for(Cell cell: cellLine) {
+                    cell.calculateNewTemperature();
+                }
+            }
+        } else {
+            //Calculate all cells except the ones along edges
+            int height = this.Cells.length;
+            int width = this.Cells[0].length;
+
+            //Left
+            for(int i = 0; i < (height/2); i ++) {
+                for(int j = 0; j < (width/2) + 1; j++) {
+                    this.Cells[i][j].calculateNewTemperature();
+                }
+            }
+
+            for(int i = ((height/2)); i < height; i ++) {
+                for(int j = 0; j < (width/2); j++) {
+                    this.Cells[i][j].calculateNewTemperature();
+                }
+            }
+
+            //Right
+            for(int i = (height/2); i < height; i ++) {
+                for(int j = ((width/2)); j < width; j++) {
+                    this.Cells[i][j].calculateNewTemperature();
+                }
+            }
+
+            for(int i = 0; i < (height/2); i ++) {
+                for(int j = ((width/2) + 1); j < width; j++) {
+                    this.Cells[i][j].calculateNewTemperature();
+                }
             }
         }
 
@@ -61,7 +107,9 @@ public class Grid {
      * Individual pockets in the grid.
      */
     public class Cell {
-        final int x, y;
+        int x, y;
+
+        public int sector = -1;
 
         double percentM1, percentM2, percentM3;
 
@@ -69,6 +117,9 @@ public class Grid {
         boolean isHeatSource = false;
 
         volatile double temperature;
+
+        public Cell(){
+        }
 
         /**
          * Instantiate a new cell.
@@ -96,6 +147,7 @@ public class Grid {
             this.x = cell.x;;
             this.y = cell.y;
             this.temperature = cell.temperature;
+            this.sector = cell.sector;
 
             this.percentM1 = cell.percentM1;
             this.percentM2 = cell.percentM2;
@@ -108,21 +160,20 @@ public class Grid {
         /**
          * Calculate a new temperature based on neighbors.
          */
-        //TODO: Incomplete
         public void calculateNewTemperature() {
             //Don't update if these two cells are the ones where heat is applied.
             //TODO: These can vary randomly over time
             if(this.isHeatSource) return;
 
+
+            //Figuring out the max X and Y on the other side made me want to cry.
+            int height = Main.readGrid.Cells.length;
+            int maxX = height - 1;
+            int width = Main.readGrid.Cells[0].length;
+            int maxY = width - 1;
+
             //Gather up the neighbors from the read grid
             ArrayList<Cell> neighbors = new ArrayList<>();
-
-            int height = Main.readGrid.Cells.length;
-            int width = Main.readGrid.Cells[0].length;
-
-            //Roll with it, this is right
-            int maxX = height - 1;
-            int maxY = width - 1;
 
             //Neighbor to the left
             if((this.x - 1) >= 0) {
