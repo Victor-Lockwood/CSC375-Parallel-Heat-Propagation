@@ -54,12 +54,11 @@ public class Grid {
 
     /**
      * Calculate the temperature of the whole grid.
-     * @param includeEdges
+     * @param directCalculation
      */
-    //TODO: Edges/dividing up grid
-    public static void calculateNewTemperature(boolean includeEdges, Grid grid) {
+    public static void calculateNewTemperature(boolean directCalculation, Grid grid) {
 
-        if(includeEdges) {
+        if(directCalculation) {
 
             for(Cell[] cellLine: grid.Cells) {
                 for(Cell cell: cellLine) {
@@ -73,22 +72,14 @@ public class Grid {
 
     static void divideAndConquer(Cell[][] cells) {
         int numRows = cells.length;
-        int numCols = cells[0].length;
 
+        if(numRows > 5) {
 
-        if(numRows > 10) {
-
-//            Cell[][] firstHalf = Arrays.copyOfRange(cells, 0, numRows/2);
-//            Cell[][] secondHalf = Arrays.copyOfRange(cells, numRows/2, numRows);
-//
-//
-//            divideAndConquer(firstHalf);
-//            divideAndConquer(secondHalf);
-
+            //Divide into quadrants and then call divideAndConquer on those quadrants til they reach a specified minimum number of rows
             Cell[][] firstHalf = Arrays.copyOfRange(cells, 0, numRows/2);
 
-            Cell[][] firstQuarter = new Cell[firstHalf.length][firstHalf[0].length/2 + 1];
-            Cell[][] secondQuarter = new Cell[firstHalf.length][firstHalf[0].length/2 + 1];
+            Cell[][] firstQuarter = new Cell[firstHalf.length][firstHalf[0].length/2];
+            Cell[][] secondQuarter = new Cell[firstHalf.length][firstHalf[0].length/2];
 
             for(int row = 0; row < firstHalf.length; row++) {
                 firstQuarter[row] = Arrays.copyOfRange(firstHalf[row], 0, firstHalf[row].length/2);
@@ -98,8 +89,8 @@ public class Grid {
 
             Cell[][] secondHalf = Arrays.copyOfRange(cells, numRows/2, numRows);
 
-            Cell[][] thirdQuarter = new Cell[secondHalf.length][secondHalf[0].length/2 + 1];
-            Cell[][] fourthQuarter = new Cell[secondHalf.length][firstHalf[0].length/2 + 1];
+            Cell[][] thirdQuarter = new Cell[secondHalf.length][secondHalf[0].length/2];
+            Cell[][] fourthQuarter = new Cell[secondHalf.length][firstHalf[0].length/2];
 
             for(int row = 0; row < secondHalf.length; row++) {
                 thirdQuarter[row] = Arrays.copyOfRange(secondHalf[row], 0, secondHalf[row].length/2);
