@@ -58,6 +58,8 @@ public class Main {
 
     static volatile double highestTemp = 0;
 
+    static final int NCPUS = Runtime.getRuntime().availableProcessors();
+
     /**
      * Specs: https://gee.cs.oswego.edu/dl/csc375/a3V2.html
      * @param args
