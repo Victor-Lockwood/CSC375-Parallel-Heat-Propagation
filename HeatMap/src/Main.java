@@ -1,4 +1,6 @@
 import javax.swing.*;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
@@ -72,18 +74,22 @@ public class Main {
 
         setGui();
 
-
+        ForkJoinPool fjp = ForkJoinPool.commonPool();
 
         for(int i = 0; i < threshold; i++) {
-            Thread.sleep(10);
-            readGrid.calculateNewTemperature(false, readGrid);
 
+            Worker worker = new Worker(readGrid.Cells);
+            fjp.invoke(worker);
+
+            fjp.awaitQuiescence(2, TimeUnit.SECONDS);
             Grid swapGrid = readGrid;
             readGrid = writeGrid;
             writeGrid = swapGrid;
+
+            //Too fast otherwise!
+            Thread.sleep(10);
         }
 
-        return;
     }
 
     /**
