@@ -122,7 +122,7 @@ public class Grid {
 
         public int sector = -1;
 
-        double percentM1, percentM2, percentM3;
+        double[] metalPercentages;
 
         //Keep track of the heat source cell once we get down to dividing and conquering.
         boolean isHeatSource = false;
@@ -142,12 +142,19 @@ public class Grid {
             this.colNumber = colNumber;
             this.temperature = 0;
 
-            double metal1Variation = ThreadLocalRandom.current().nextDouble(.25);
-            double metal2Variation = ThreadLocalRandom.current().nextDouble(.25);
+            int metal1Variation = ThreadLocalRandom.current().nextInt(25);
+            int variationBound = 25 - metal1Variation;
+            int metal2Variation = ThreadLocalRandom.current().nextInt(variationBound);
 
-            percentM1 = 0.33; //* metal1Variation;
-            percentM2 = 0.33; //* metal2Variation;
-            percentM3 = 1 - (percentM1 + percentM2);
+            int metal1 = 33 + metal1Variation;
+            int metal2 = 33 + metal2Variation;
+            int metal3 = 100 - (metal1 + metal2);
+
+            double metal1Percent = (double) metal1 / 100;
+            double metal2Percent = (double) metal2 / 100;
+            double metal3Percent = (double) metal3 / 100;
+
+            this.metalPercentages = new double[]{metal1Percent, metal2Percent, metal3Percent};
         }
 
         /**
@@ -160,9 +167,7 @@ public class Grid {
             this.temperature = cell.temperature;
             this.sector = cell.sector;
 
-            this.percentM1 = cell.percentM1;
-            this.percentM2 = cell.percentM2;
-            this.percentM3 = cell.percentM3;
+            this.metalPercentages = Arrays.copyOf(cell.metalPercentages, cell.metalPercentages.length);
 
             this.isHeatSource = cell.isHeatSource;
         }
@@ -174,34 +179,49 @@ public class Grid {
         public void calculateNewTemperature() {
             //Don't update if these two cells are the ones where heat is applied.
             //TODO: These can vary randomly over time
-            if(this.isHeatSource) return;
+            if(this.isHeatSource) {
+                double heatSourceTemp = Main.T;
+                if(rowNumber == 0) heatSourceTemp = Main.S;
+                double fluctuation = ThreadLocalRandom.current().nextDouble(.25);
+                boolean coinFlip = ThreadLocalRandom.current().nextBoolean();
+
+                if(coinFlip) {
+                    Main.writeGrid.Cells[this.rowNumber][this.colNumber].temperature = heatSourceTemp + fluctuation;
+                    return;
+                } else {
+                    Main.writeGrid.Cells[this.rowNumber][this.colNumber].temperature = heatSourceTemp - fluctuation;
+                    return;
+                }
+
+            }
 
 
             //Figuring out the max X and Y on the other side made me want to cry.
             int numRows = Main.readGrid.Cells.length;
             int maxRowNum = numRows - 1;
+
             int numCols = Main.readGrid.Cells[0].length;
             int maxColNum = numCols - 1;
 
             //Gather up the neighbors from the read grid
             ArrayList<Cell> neighbors = new ArrayList<>();
 
-            //Neighbor to the left
+            //Neighbor above
             if((this.rowNumber - 1) >= 0) {
                 neighbors.add(Main.readGrid.Cells[this.rowNumber - 1][this.colNumber]);
             }
 
-            //Neighbor to the right
+            //Neighbor below
             if((this.rowNumber + 1) <= maxRowNum) {
                 neighbors.add(Main.readGrid.Cells[this.rowNumber + 1][this.colNumber]);
             }
 
-            //Neighbor up above - remember, top left is (0,0) so y is the opposite direction than we intuitively expect
+            //Neighbor to the left
             if((this.colNumber - 1) >= 0) {
                 neighbors.add(Main.readGrid.Cells[this.rowNumber][this.colNumber - 1]);
             }
 
-            //Neighbor below
+            //Neighbor to the right
             if((this.colNumber + 1) <= maxColNum) {
                 neighbors.add(Main.readGrid.Cells[this.rowNumber][this.colNumber + 1]);
             }
@@ -209,35 +229,47 @@ public class Grid {
             //Loop through our metals and aggregate the temperature percentage calculation
             double resultTemp = 0;
 
-            //Metal 1
-            double agg1 = 0;
-            for(Cell neighbor : neighbors) {
-                agg1 += neighbor.temperature * neighbor.percentM1;
+            double[] metalConstants = new double[]{Main.C1, Main.C2, Main.C3};
+
+            for(int metalNumber = 0; metalNumber < metalConstants.length; metalNumber++) {
+                double neighborResult = 0;
+
+                for(Cell neighbor: neighbors) {
+                    neighborResult += neighbor.temperature * neighbor.metalPercentages[metalNumber];
+                }
+
+                resultTemp += metalConstants[metalNumber] * (neighborResult / neighbors.size());
             }
 
-            agg1 *= Main.C1;
-
-            resultTemp = resultTemp + agg1/neighbors.size();
-
-            //Metal 2
-            double agg2 = 0;
-            for(Cell neighbor : neighbors) {
-                agg2 += neighbor.temperature * neighbor.percentM2;
-            }
-
-            agg2 *= Main.C2;
-
-            resultTemp = resultTemp + agg2/neighbors.size();
-
-            //Metal 3
-            double agg3 = 0;
-            for(Cell neighbor : neighbors) {
-                agg3 += neighbor.temperature * neighbor.percentM3;
-            }
-
-            agg3 *= Main.C3;
-
-            resultTemp = resultTemp + agg3/neighbors.size();
+//            //Metal 1
+//            double agg1 = 0;
+//            for(Cell neighbor : neighbors) {
+//                agg1 += neighbor.temperature * neighbor.percentM1;
+//            }
+//
+//            agg1 *= Main.C1;
+//
+//            resultTemp = resultTemp + agg1/neighbors.size();
+//
+//            //Metal 2
+//            double agg2 = 0;
+//            for(Cell neighbor : neighbors) {
+//                agg2 += neighbor.temperature * neighbor.percentM2;
+//            }
+//
+//            agg2 *= Main.C2;
+//
+//            resultTemp = resultTemp + agg2/neighbors.size();
+//
+//            //Metal 3
+//            double agg3 = 0;
+//            for(Cell neighbor : neighbors) {
+//                agg3 += neighbor.temperature * neighbor.percentM3;
+//            }
+//
+//            agg3 *= Main.C3;
+//
+//            resultTemp = resultTemp + agg3/neighbors.size();
 
             //We update the temp of the corresponding cell in the WRITE GRID,
             //NOT our local temp.

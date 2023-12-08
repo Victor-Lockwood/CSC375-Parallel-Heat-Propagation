@@ -74,6 +74,18 @@ public class Main {
 
         setGui();
 
+//        for(int i = 0; i < threshold; i++) {
+//            Grid.calculateNewTemperature(true, readGrid);
+//
+//            Grid swapGrid = readGrid;
+//            readGrid = writeGrid;
+//            writeGrid = swapGrid;
+//
+//            //Too fast otherwise!
+//            Thread.sleep(10);
+//        }
+
+
         ForkJoinPool fjp = ForkJoinPool.commonPool();
 
         for(int i = 0; i < threshold; i++) {

@@ -52,7 +52,7 @@ public class Gui extends JPanel {
                 //Kelvin = Celsius + 273.15
 
                 //Ported code from here: https://gist.github.com/paulkaplan/5184275
-                double modifiedTemp = cellLine[j].temperature; //(cellLine[j].temperature + 273.15) / 100;
+                double modifiedTemp = cellLine[j].temperature * 100; //(cellLine[j].temperature + 273.15) / 100;
 
                 int red, blue, green;
 
