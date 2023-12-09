@@ -60,8 +60,6 @@ public class Main {
 
     static volatile double highestTemp = 0;
 
-    static final int NCPUS = Runtime.getRuntime().availableProcessors();
-
     /**
      * Specs: https://gee.cs.oswego.edu/dl/csc375/a3V2.html
      * @param args
@@ -74,23 +72,11 @@ public class Main {
 
         setGui();
 
-//        for(int i = 0; i < threshold; i++) {
-//            Grid.calculateNewTemperature(true, readGrid);
-//
-//            Grid swapGrid = readGrid;
-//            readGrid = writeGrid;
-//            writeGrid = swapGrid;
-//
-//            //Too fast otherwise!
-//            Thread.sleep(10);
-//        }
-
-
         ForkJoinPool fjp = ForkJoinPool.commonPool();
 
         for(int i = 0; i < threshold; i++) {
 
-            Worker worker = new Worker(readGrid.Cells);
+            Worker worker = new Worker(readGrid.Cells, readGrid, writeGrid, C1, C2, C3);
             fjp.invoke(worker);
 
             fjp.awaitQuiescence(2, TimeUnit.SECONDS);
@@ -101,6 +87,8 @@ public class Main {
             //Too fast otherwise!
             Thread.sleep(10);
         }
+
+        System.out.println("Threshold reached.");
 
     }
 
