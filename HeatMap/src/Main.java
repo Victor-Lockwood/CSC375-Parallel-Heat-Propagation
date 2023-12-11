@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
@@ -46,6 +47,8 @@ public class Main {
     public static int threshold;
 
     public static boolean debug = false;
+
+    public static boolean network = false;
     //</editor-fold>
 
     /**
@@ -72,20 +75,62 @@ public class Main {
 
         setGui();
 
-        ForkJoinPool fjp = ForkJoinPool.commonPool();
+        if(!network) {
+            ForkJoinPool fjp = ForkJoinPool.commonPool();
 
-        for(int i = 0; i < threshold; i++) {
+            for(int i = 0; i < threshold; i++) {
 
-            Worker worker = new Worker(readGrid.Cells, readGrid, writeGrid, C1, C2, C3);
-            fjp.invoke(worker);
+                Worker worker = new Worker(readGrid.Cells, readGrid, writeGrid, C1, C2, C3);
+                fjp.invoke(worker);
 
-            fjp.awaitQuiescence(2, TimeUnit.SECONDS);
-            Grid swapGrid = readGrid;
-            readGrid = writeGrid;
-            writeGrid = swapGrid;
+                fjp.awaitQuiescence(2, TimeUnit.SECONDS);
+                Grid swapGrid = readGrid;
+                readGrid = writeGrid;
+                writeGrid = swapGrid;
 
-            //Too fast otherwise!
-            Thread.sleep(10);
+                //Too fast otherwise!
+                Thread.sleep(10);
+            }
+        } else {
+            int numServers = 3;
+            int numRows = readGrid.Cells.length;
+
+            ArrayList<Cell[][]> serverChunks = new ArrayList<Cell[][]>();
+
+            //Break the read grid into chunks
+            for(int serverNum = 0; serverNum < numServers; serverNum++) {
+                int offset = serverNum * (numRows / numServers);
+
+                Cell[][] serverChunk = NetworkHandler.getServerChunk(numServers, readGrid, offset);
+                serverChunks.add(serverChunk);
+            }
+
+            ForkJoinPool fjp = ForkJoinPool.commonPool();
+
+            for(int i = 0; i < threshold; i++) {
+
+                ArrayList<Worker> workers = new ArrayList<>();
+
+                for(int j = 0; j < serverChunks.size(); j++) {
+                    Cell[][] chunkCells = serverChunks.get(j);
+                    Grid localReadGrid = new Grid();
+                    localReadGrid.Cells = chunkCells;
+
+                    Worker worker = new Worker(chunkCells, readGrid, writeGrid, C1, C2, C3);
+
+                    fjp.invoke(worker);
+                }
+
+                fjp.awaitQuiescence(2, TimeUnit.SECONDS);
+                Grid swapGrid = readGrid;
+                readGrid = writeGrid;
+                writeGrid = swapGrid;
+
+                //Too fast otherwise!
+                Thread.sleep(10);
+            }
+
+            return;
         }
 
         System.out.println("Threshold reached.");
@@ -114,6 +159,7 @@ public class Main {
             threshold = Integer.parseInt(args[6]);
 
             if(args.length > 7) debug = Boolean.parseBoolean(args[7]);
+            if(args.length > 8) network = Boolean.parseBoolean(args[8]);
 
         } catch (NumberFormatException e) {
             System.err.println("Argument" + args[0] + " must be a number.");

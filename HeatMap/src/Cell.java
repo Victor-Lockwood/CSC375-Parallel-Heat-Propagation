@@ -63,6 +63,38 @@ public class Cell {
     }
 
     /**
+     * Clone a matrix of cells.
+     * @param cellsToClone  What it says on the tin.
+     * @return
+     */
+    public static Cell[][] cloneCellBlock(Cell[][] cellsToClone) {
+        Cell[][] clones = new Cell[cellsToClone.length][cellsToClone[0].length];
+
+        for(int rowNum = 0; rowNum < cellsToClone.length; rowNum++) {
+            for(int colNum = 0; colNum < cellsToClone[0].length; colNum++) {
+                clones[rowNum][colNum] = new Cell(cellsToClone[rowNum][colNum]);
+            }
+        }
+
+        return clones;
+    }
+
+    /**
+     * Clone an array of cells.
+     * @param cellsToClone  What it says on the tin.
+     * @return
+     */
+    public static Cell[] cloneCellLine(Cell[] cellsToClone) {
+        Cell[] clones = new Cell[cellsToClone.length];
+
+        for(int colNum = 0; colNum < cellsToClone.length; colNum++) {
+            clones[colNum] = new Cell(cellsToClone[colNum]);
+        }
+
+        return clones;
+    }
+
+    /**
      * Calculate a new temperature based on provided neighbors.
      */
     public void calculateNewTemperature(ArrayList<Cell> neighbors, Grid writeGrid, double[] metalConstants) {
