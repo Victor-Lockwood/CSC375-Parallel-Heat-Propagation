@@ -1,6 +1,8 @@
+import Server.ServerCell;
+
 public class Chunker {
 
-    public static Cell[][] getServerChunk(int numServers, Grid readGrid, int offset) {
+    public static ServerCell[][] getServerChunk(int numServers, Grid readGrid, int offset) {
         int numRows = readGrid.Cells.length;
 
         //Overlapped row above the limit
@@ -9,7 +11,7 @@ public class Chunker {
         //If you're not the first chunk, add one more to get the row from the previous chunk
         if(offset != 0) rowsPerServer += 1;
 
-        Cell[][] serverChunk = new Cell[rowsPerServer][readGrid.Cells[0].length];
+        ServerCell[][] serverChunk = new ServerCell[rowsPerServer][readGrid.Cells[0].length];
 
         int lastRow = serverChunk.length - 1;
         boolean finalChunk = false;
@@ -41,7 +43,7 @@ public class Chunker {
 
         //Set the cells in that row to do not calculate unless we're on the last chunk
         if(!finalChunk) {
-            for(Cell cell: serverChunk[lastRow]) {
+            for(ServerCell cell: serverChunk[lastRow]) {
                 cell.doNotCalculate = true;
             }
         }
@@ -49,7 +51,7 @@ public class Chunker {
 
         //First row other than the very first chunk needs to be set to do not calculate as well
         if(offset != 0) {
-            for(Cell cell: serverChunk[0]) {
+            for(ServerCell cell: serverChunk[0]) {
                 cell.doNotCalculate = true;
             }
         }

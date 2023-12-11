@@ -1,3 +1,6 @@
+import Server.ServerCell;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
@@ -5,7 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Individual pockets in the grid.
  */
-public class Cell {
+public class Cell implements Serializable {
     public int rowNumber, colNumber;
 
     public int chunkedRowNumber, chunkedColNum;
@@ -84,14 +87,23 @@ public class Cell {
 
     /**
      * Clone an array of cells.
-     * @param cellsToClone  What it says on the tin.
+     *
+     * @param cellsToClone What it says on the tin.
      * @return
      */
-    public static Cell[] cloneCellLine(Cell[] cellsToClone) {
-        Cell[] clones = new Cell[cellsToClone.length];
+    public static ServerCell[] cloneCellLine(Cell[] cellsToClone) {
+        ServerCell[] clones = new ServerCell[cellsToClone.length];
 
         for(int colNum = 0; colNum < cellsToClone.length; colNum++) {
-            clones[colNum] = new Cell(cellsToClone[colNum]);
+            clones[colNum] = new ServerCell();
+
+            clones[colNum].rowNumber = cellsToClone[colNum].rowNumber;;
+            clones[colNum].colNumber = cellsToClone[colNum].colNumber;
+            clones[colNum].temperature = cellsToClone[colNum].temperature;
+
+            clones[colNum].metalPercentages = Arrays.copyOf(cellsToClone[colNum].metalPercentages, cellsToClone[colNum].metalPercentages.length);
+
+            clones[colNum].isHeatSource = cellsToClone[colNum].isHeatSource;
         }
 
         return clones;

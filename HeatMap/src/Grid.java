@@ -1,8 +1,9 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Grid {
+public class Grid implements Serializable {
 
     public Cell[][] Cells;
 

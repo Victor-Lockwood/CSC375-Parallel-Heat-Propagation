@@ -20,6 +20,7 @@ public class ServerMain {
             Socket socket = ss.accept();
             System.out.println("Got connection from " + socket);
 
+            //Some assistance from here: https://stackoverflow.com/questions/27736175/how-to-send-receive-objects-using-sockets-in-java
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
 

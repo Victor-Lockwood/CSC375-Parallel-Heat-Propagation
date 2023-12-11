@@ -1,6 +1,8 @@
 package Server;
 
-public class ServerGrid {
+import java.io.Serializable;
+
+public class ServerGrid implements Serializable {
 
     public ServerCell[][] Cells;
 

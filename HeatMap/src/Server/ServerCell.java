@@ -1,5 +1,6 @@
 package Server;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
@@ -7,7 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Individual pockets in the grid.
  */
-public class ServerCell {
+public class ServerCell implements Serializable {
     public int rowNumber, colNumber;
 
     public int chunkedRowNumber, chunkedColNum;
@@ -15,14 +16,14 @@ public class ServerCell {
     /**
      * Flag we'll use to ignore edges
      */
-    boolean doNotCalculate = false;
+    public boolean doNotCalculate = false;
 
-    double[] metalPercentages;
+    public double[] metalPercentages;
 
     //Keep track of the heat source cell once we get down to dividing and conquering.
-    boolean isHeatSource = false;
+    public boolean isHeatSource = false;
 
-    volatile double temperature;
+    public volatile double temperature;
 
     public ServerCell(){
     }

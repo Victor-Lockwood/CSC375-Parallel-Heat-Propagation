@@ -2,7 +2,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.RecursiveAction;
 
-public class NetworkWorker extends RecursiveAction {
+/**
+ * For local testing of worker code that'll live on the servers.
+ */
+public class GridAgnosticWorker extends RecursiveAction {
 
     Cell[][] cells;
 
@@ -16,7 +19,7 @@ public class NetworkWorker extends RecursiveAction {
 
     //int threshold;
 
-    public NetworkWorker(Cell[][] cells, Grid readGrid, Grid writeGrid, double C1, double C2, double C3, int offset) {
+    public GridAgnosticWorker(Cell[][] cells, Grid readGrid, Grid writeGrid, double C1, double C2, double C3, int offset) {
         this.cells = cells;
         this.readGrid = readGrid;
         this.writeGrid = writeGrid;
@@ -24,7 +27,7 @@ public class NetworkWorker extends RecursiveAction {
         this.offset = offset;
     }
 
-    public NetworkWorker(NetworkObject networkObject) {
+    public GridAgnosticWorker(NetworkObject networkObject) {
         this.cells = networkObject.cells;
         this.readGrid = networkObject.readGrid;
         this.writeGrid = networkObject.writeGrid;
@@ -61,10 +64,10 @@ public class NetworkWorker extends RecursiveAction {
             }
 
             invokeAll(
-                    new NetworkWorker(firstQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset),
-                    new NetworkWorker(secondQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset),
-                    new NetworkWorker(thirdQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset),
-                    new NetworkWorker(fourthQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset)
+                    new GridAgnosticWorker(firstQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset),
+                    new GridAgnosticWorker(secondQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset),
+                    new GridAgnosticWorker(thirdQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset),
+                    new GridAgnosticWorker(fourthQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset)
             );
 
         } else {

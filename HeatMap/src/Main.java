@@ -1,3 +1,6 @@
+import Server.ServerCell;
+import Server.ServerGrid;
+
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -99,29 +102,28 @@ public class Main {
             int numServers = 3;
             int numRows = readGrid.Cells.length;
 
-            ArrayList<NetworkWorker> workers = new ArrayList<>();
-
-            ForkJoinPool fjp = ForkJoinPool.commonPool();
+            ArrayList<ClientWorker> workers = new ArrayList<>();
 
             for(int i = 0; i < threshold; i++) {
 
                 for(int serverNum = 0; serverNum < numServers; serverNum++) {
+                    String hostName = "127.0.0.1";
+                    int portNumber = 26880 + serverNum;
+
                     int offset = serverNum * (numRows / numServers);
                     if(offset != 0) offset -= 1;
 
-                    Cell[][] serverChunk = Chunker.getServerChunk(numServers, readGrid, offset);
+                    ServerCell[][] serverChunk = Chunker.getServerChunk(numServers, readGrid, offset);
 
-                    Grid localReadGrid = new Grid();
+                    ServerGrid localReadGrid = new ServerGrid();
                     localReadGrid.Cells = serverChunk;
 
-                    Grid localWriteGrid = new Grid();
-                    localWriteGrid.Cells = Cell.cloneCellBlockForWrite(serverChunk);
+                    ServerGrid localWriteGrid = new ServerGrid();
+                    localWriteGrid.Cells = ServerCell.cloneCellBlockForWrite(serverChunk);
 
-                    NetworkObject networkObject = new NetworkObject(serverChunk, localReadGrid, localWriteGrid, C1, C2, C3, offset);
+                    Server.NetworkObject networkObject = new Server.NetworkObject(serverChunk, localReadGrid, localWriteGrid, C1, C2, C3, offset, S, T);
+                    workers.add(new ClientWorker(networkObject, portNumber, hostName));
 
-                    ExecutorService executorService = Executors.newFixedThreadPool(NCPUS);
-
-                    executorService.awaitTermination(2, TimeUnit.SECONDS);
 //                    NetworkWorker worker = new NetworkWorker(networkObject);
 //                    workers.add(worker);
 //
@@ -130,11 +132,21 @@ public class Main {
 
                 }
 
-                fjp.awaitQuiescence(2, TimeUnit.SECONDS);
+                ExecutorService executorService = Executors.newFixedThreadPool(NCPUS);
 
-                for(NetworkWorker worker: workers) {
-                    for(Cell[] cellLine: worker.writeGrid.Cells) {
-                        for(Cell cell: cellLine) {
+                for(ClientWorker worker: workers) {
+                    executorService.submit(worker);
+                }
+
+                executorService.awaitTermination(2, TimeUnit.SECONDS);
+
+                //fjp.awaitQuiescence(2, TimeUnit.SECONDS);
+
+                for(ClientWorker worker: workers) {
+                    if(worker.returnedGrid == null) continue;
+                    for(ServerCell[] cellLine: worker.returnedGrid.Cells) {
+                        if(cellLine == null) continue;
+                        for(ServerCell cell: cellLine) {
                             if(cell == null) continue;
                             writeGrid.Cells[cell.rowNumber][cell.colNumber].temperature = cell.temperature;
                         }
