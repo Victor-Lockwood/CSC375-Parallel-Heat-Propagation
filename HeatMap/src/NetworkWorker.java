@@ -75,23 +75,28 @@ public class NetworkWorker extends RecursiveAction {
                     ArrayList<Cell> neighbors = new ArrayList<>();
 
                     //Neighbor above
-                    if((cell.rowNumber - 1) >= 0) {
-                        neighbors.add(this.readGrid.Cells[cell.rowNumber - 1][cell.colNumber]);
+                    if((cell.chunkedRowNumber - 1) >= 0) {
+                        if(this.readGrid.Cells[cell.chunkedRowNumber - 1][cell.chunkedColNum] != null) {
+                            neighbors.add(this.readGrid.Cells[cell.chunkedRowNumber - 1][cell.chunkedColNum]);
+                        }
                     }
 
                     //Neighbor below
-                    if((cell.rowNumber + 1) <= maxRowNum) {
-                        neighbors.add(this.readGrid.Cells[cell.rowNumber + 1][cell.colNumber]);
+                    if((cell.chunkedRowNumber + 1) <= maxRowNum) {
+                        if(this.readGrid.Cells[cell.chunkedRowNumber + 1][cell.chunkedColNum] != null)
+                            neighbors.add(this.readGrid.Cells[cell.chunkedRowNumber + 1][cell.chunkedColNum]);
                     }
 
                     //Neighbor to the left
-                    if((cell.colNumber - 1) >= 0) {
-                        neighbors.add(this.readGrid.Cells[cell.rowNumber][cell.colNumber - 1]);
+                    if((cell.chunkedColNum - 1) >= 0) {
+                        if(this.readGrid.Cells[cell.chunkedRowNumber][cell.chunkedColNum - 1] != null)
+                            neighbors.add(this.readGrid.Cells[cell.chunkedRowNumber][cell.chunkedColNum - 1]);
                     }
 
                     //Neighbor to the right
-                    if((cell.colNumber + 1) <= maxColNum) {
-                        neighbors.add(Main.readGrid.Cells[cell.rowNumber][cell.colNumber + 1]);
+                    if((cell.chunkedColNum + 1) <= maxColNum) {
+                        if(this.readGrid.Cells[cell.chunkedRowNumber][cell.chunkedColNum + 1] != null)
+                            neighbors.add(this.readGrid.Cells[cell.chunkedRowNumber][cell.chunkedColNum + 1]);
                     }
 
                     cell.calculateNewTemperature(neighbors, this.writeGrid, this.metalConstants);

@@ -20,15 +20,17 @@ public class NetworkHandler {
         for(int rowNumber = 0; rowNumber < readGrid.Cells.length; rowNumber++) {
             if(rowNumber == rowsPerServer) break;
 
-            int localOffset = offset;
-            if(offset != 0) localOffset = offset - 1;
-
             if(rowNumber + offset >= readGrid.Cells.length) {
                 finalChunk = true;
                 break;
             }
 
             serverChunk[rowNumber] = Cell.cloneCellLine(readGrid.Cells[rowNumber + offset]);
+
+            for(int colNum = 0; colNum < serverChunk[0].length; colNum++) {
+                serverChunk[rowNumber][colNum].chunkedRowNumber = rowNumber;
+                serverChunk[rowNumber][colNum].chunkedColNum = colNum;
+            }
         }
 
         //Get the number for the last row of cells that isn't null

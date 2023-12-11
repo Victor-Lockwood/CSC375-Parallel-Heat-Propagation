@@ -102,13 +102,14 @@ public class Main {
 
                 for(int serverNum = 0; serverNum < numServers; serverNum++) {
                     int offset = serverNum * (numRows / numServers);
+                    if(offset != 0) offset -= 1;
 
                     Cell[][] serverChunk = NetworkHandler.getServerChunk(numServers, readGrid, offset);
 
                     Grid localReadGrid = new Grid();
                     localReadGrid.Cells = serverChunk;
 
-                    NetworkWorker worker = new NetworkWorker(serverChunk, readGrid, writeGrid, C1, C2, C3, offset);
+                    NetworkWorker worker = new NetworkWorker(serverChunk, localReadGrid, writeGrid, C1, C2, C3, offset);
 
                     fjp.invoke(worker);
                 }

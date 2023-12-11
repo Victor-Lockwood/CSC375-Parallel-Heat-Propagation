@@ -6,7 +6,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * Individual pockets in the grid.
  */
 public class Cell {
-    int rowNumber, colNumber;
+    public int rowNumber, colNumber;
+
+    public int chunkedRowNumber, chunkedColNum;
 
     /**
      * Flag we'll use to ignore edges
