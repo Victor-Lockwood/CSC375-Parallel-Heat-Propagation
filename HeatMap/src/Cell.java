@@ -158,7 +158,7 @@ public class Cell {
     }
 
     /**
-     * Calculate a new temperature based on provided neighbors.
+     * Calculate a new temperature based on provided neighbors.  Used in a local write grid.
      */
     public void calculateNewTemperaturePartialWriteGrid(ArrayList<Cell> neighbors, Grid writeGrid, double[] metalConstants) {
         //Don't update if these two cells are the ones where heat is applied.
@@ -191,10 +191,8 @@ public class Cell {
             resultTemp += metalConstants[metalNumber] * (neighborResult / neighbors.size());
         }
 
-        //We update the temp of the corresponding cell in the WRITE GRID,
+        //We update the temp of the corresponding cell in the LOCAL WRITE GRID,
         //NOT our local temp.
         writeGrid.Cells[this.chunkedRowNumber][this.chunkedColNum].temperature = resultTemp;
-
-        if(resultTemp > Main.highestTemp) Main.highestTemp = resultTemp;
     }
 }
