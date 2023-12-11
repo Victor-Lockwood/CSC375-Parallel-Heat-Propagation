@@ -95,6 +95,7 @@ public class Main {
             int numServers = 3;
             int numRows = readGrid.Cells.length;
 
+            ArrayList<NetworkWorker> workers = new ArrayList<>();
 
             ForkJoinPool fjp = ForkJoinPool.commonPool();
 
@@ -109,12 +110,26 @@ public class Main {
                     Grid localReadGrid = new Grid();
                     localReadGrid.Cells = serverChunk;
 
-                    NetworkWorker worker = new NetworkWorker(serverChunk, localReadGrid, writeGrid, C1, C2, C3, offset);
+                    Grid localWriteGrid = new Grid();
+                    localWriteGrid.Cells = Cell.cloneCellBlockForWrite(serverChunk);
+
+                    NetworkWorker worker = new NetworkWorker(serverChunk, localReadGrid, localWriteGrid, C1, C2, C3, offset);
+                    workers.add(worker);
 
                     fjp.invoke(worker);
                 }
 
                 fjp.awaitQuiescence(2, TimeUnit.SECONDS);
+
+                for(NetworkWorker worker: workers) {
+                    for(Cell[] cellLine: worker.writeGrid.Cells) {
+                        for(Cell cell: cellLine) {
+                            if(cell == null) continue;
+                            writeGrid.Cells[cell.rowNumber][cell.colNumber].temperature = cell.temperature;
+                        }
+                    }
+                }
+
                 Grid swapGrid = readGrid;
                 readGrid = writeGrid;
                 writeGrid = swapGrid;

@@ -20,7 +20,7 @@ public class NetworkWorker extends RecursiveAction {
         this.cells = cells;
         this.readGrid = readGrid;
         this.writeGrid = writeGrid;
-        metalConstants = new double[]{C1, C2, C3};
+        this.metalConstants = new double[]{C1, C2, C3};
         this.offset = offset;
     }
 
@@ -99,7 +99,7 @@ public class NetworkWorker extends RecursiveAction {
                             neighbors.add(this.readGrid.Cells[cell.chunkedRowNumber][cell.chunkedColNum + 1]);
                     }
 
-                    cell.calculateNewTemperature(neighbors, this.writeGrid, this.metalConstants);
+                    cell.calculateNewTemperaturePartialWriteGrid(neighbors, this.writeGrid, this.metalConstants);
                 }
             }
         }
