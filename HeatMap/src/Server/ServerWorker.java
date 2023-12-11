@@ -1,35 +1,43 @@
+package Server;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.RecursiveAction;
 
-public class NetworkWorker extends RecursiveAction {
+public class ServerWorker extends RecursiveAction {
 
-    Cell[][] cells;
+    ServerCell[][] cells;
 
-    final Grid readGrid;
+    final ServerGrid readGrid;
 
-    final Grid writeGrid;
+    final ServerGrid writeGrid;
 
     final double[] metalConstants;
 
     int offset = 0;
 
+    double S, T;
+
     //int threshold;
 
-    public NetworkWorker(Cell[][] cells, Grid readGrid, Grid writeGrid, double C1, double C2, double C3, int offset) {
-        this.cells = cells;
-        this.readGrid = readGrid;
-        this.writeGrid = writeGrid;
-        this.metalConstants = new double[]{C1, C2, C3};
-        this.offset = offset;
-    }
-
-    public NetworkWorker(NetworkObject networkObject) {
+    public ServerWorker(NetworkObject networkObject) {
         this.cells = networkObject.cells;
         this.readGrid = networkObject.readGrid;
         this.writeGrid = networkObject.writeGrid;
         this.metalConstants = networkObject.metalConstants;
         this.offset = networkObject.offset;
+        this.S = networkObject.S;
+        this.T = networkObject.T;
+    }
+
+    public ServerWorker(ServerCell[][] cells, ServerGrid readGrid, ServerGrid writeGrid, double C1, double C2, double C3, int offset, double S, double T) {
+        this.cells = cells;
+        this.readGrid = readGrid;
+        this.writeGrid = writeGrid;
+        this.metalConstants = new double[]{C1, C2, C3};
+        this.offset = offset;
+        this.S = S;
+        this.T = T;
     }
 
     @Override
@@ -40,20 +48,20 @@ public class NetworkWorker extends RecursiveAction {
 
             //Divide into quadrants and then spawn a new Worker for each quadrant til they reach a specified minimum number of rows tall
             //Add one extra for the edge.
-            Cell[][] firstHalf = Arrays.copyOfRange(cells, 0, numRows/2);
+            ServerCell[][] firstHalf = Arrays.copyOfRange(cells, 0, numRows/2);
 
-            Cell[][] firstQuarter = new Cell[firstHalf.length][firstHalf[0].length/2];
-            Cell[][] secondQuarter = new Cell[firstHalf.length][firstHalf[0].length/2];
+            ServerCell[][] firstQuarter = new ServerCell[firstHalf.length][firstHalf[0].length/2];
+            ServerCell[][] secondQuarter = new ServerCell[firstHalf.length][firstHalf[0].length/2];
 
             for(int row = 0; row < firstHalf.length; row++) {
                 firstQuarter[row] = Arrays.copyOfRange(firstHalf[row], 0, firstHalf[row].length/2);
                 secondQuarter[row] = Arrays.copyOfRange(firstHalf[row], firstHalf[row].length/2, firstHalf[row].length);
             }
 
-            Cell[][] secondHalf = Arrays.copyOfRange(cells, numRows/2, numRows);
+            ServerCell[][] secondHalf = Arrays.copyOfRange(cells, numRows/2, numRows);
 
-            Cell[][] thirdQuarter = new Cell[secondHalf.length][secondHalf[0].length/2];
-            Cell[][] fourthQuarter = new Cell[secondHalf.length][firstHalf[0].length/2];
+            ServerCell[][] thirdQuarter = new ServerCell[secondHalf.length][secondHalf[0].length/2];
+            ServerCell[][] fourthQuarter = new ServerCell[secondHalf.length][firstHalf[0].length/2];
 
             for(int row = 0; row < secondHalf.length; row++) {
                 thirdQuarter[row] = Arrays.copyOfRange(secondHalf[row], 0, secondHalf[row].length/2);
@@ -61,10 +69,10 @@ public class NetworkWorker extends RecursiveAction {
             }
 
             invokeAll(
-                    new NetworkWorker(firstQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset),
-                    new NetworkWorker(secondQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset),
-                    new NetworkWorker(thirdQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset),
-                    new NetworkWorker(fourthQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset)
+                    new ServerWorker(firstQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset, S, T),
+                    new ServerWorker(secondQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset, S, T),
+                    new ServerWorker(thirdQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset, S, T),
+                    new ServerWorker(fourthQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset, S, T)
             );
 
         } else {
@@ -77,10 +85,10 @@ public class NetworkWorker extends RecursiveAction {
 
             for(int rowNum = 0; rowNum < cells.length; rowNum++) {
                 for(int colNum = 0; colNum < cells[0].length; colNum++) {
-                    Cell cell = cells[rowNum][colNum];
+                    ServerCell cell = cells[rowNum][colNum];
                     if(cell == null || cell.doNotCalculate) continue;
 
-                    ArrayList<Cell> neighbors = new ArrayList<>();
+                    ArrayList<ServerCell> neighbors = new ArrayList<>();
 
                     //Neighbor above
                     if((cell.chunkedRowNumber - 1) >= 0) {
@@ -107,7 +115,7 @@ public class NetworkWorker extends RecursiveAction {
                             neighbors.add(this.readGrid.Cells[cell.chunkedRowNumber][cell.chunkedColNum + 1]);
                     }
 
-                    cell.calculateNewTemperaturePartialWriteGrid(neighbors, this.writeGrid, this.metalConstants);
+                    cell.calculateNewTemperaturePartialWriteGrid(neighbors, this.writeGrid, this.metalConstants, S, T);
                 }
             }
         }

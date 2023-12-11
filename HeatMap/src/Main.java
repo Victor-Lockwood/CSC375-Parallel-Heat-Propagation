@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
@@ -63,6 +65,8 @@ public class Main {
 
     static volatile double highestTemp = 0;
 
+    static final int NCPUS = Runtime.getRuntime().availableProcessors();
+
     /**
      * Specs: https://gee.cs.oswego.edu/dl/csc375/a3V2.html
      * @param args
@@ -80,7 +84,7 @@ public class Main {
 
             for(int i = 0; i < threshold; i++) {
 
-                Worker worker = new Worker(readGrid.Cells, readGrid, writeGrid, C1, C2, C3);
+                Worker worker = new Worker(readGrid.Cells, readGrid, writeGrid, C1, C2, C3, S, T);
                 fjp.invoke(worker);
 
                 fjp.awaitQuiescence(2, TimeUnit.SECONDS);
@@ -105,7 +109,7 @@ public class Main {
                     int offset = serverNum * (numRows / numServers);
                     if(offset != 0) offset -= 1;
 
-                    Cell[][] serverChunk = NetworkHandler.getServerChunk(numServers, readGrid, offset);
+                    Cell[][] serverChunk = Chunker.getServerChunk(numServers, readGrid, offset);
 
                     Grid localReadGrid = new Grid();
                     localReadGrid.Cells = serverChunk;
@@ -113,10 +117,17 @@ public class Main {
                     Grid localWriteGrid = new Grid();
                     localWriteGrid.Cells = Cell.cloneCellBlockForWrite(serverChunk);
 
-                    NetworkWorker worker = new NetworkWorker(serverChunk, localReadGrid, localWriteGrid, C1, C2, C3, offset);
-                    workers.add(worker);
+                    NetworkObject networkObject = new NetworkObject(serverChunk, localReadGrid, localWriteGrid, C1, C2, C3, offset);
 
-                    fjp.invoke(worker);
+                    ExecutorService executorService = Executors.newFixedThreadPool(NCPUS);
+
+                    executorService.awaitTermination(2, TimeUnit.SECONDS);
+//                    NetworkWorker worker = new NetworkWorker(networkObject);
+//                    workers.add(worker);
+//
+//                    fjp.invoke(worker);
+
+
                 }
 
                 fjp.awaitQuiescence(2, TimeUnit.SECONDS);

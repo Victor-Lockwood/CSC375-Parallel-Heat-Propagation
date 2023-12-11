@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-
-public class NetworkHandler {
+public class Chunker {
 
     public static Cell[][] getServerChunk(int numServers, Grid readGrid, int offset) {
         int numRows = readGrid.Cells.length;

@@ -1,3 +1,5 @@
+package Server;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
@@ -5,7 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Individual pockets in the grid.
  */
-public class Cell {
+public class ServerCell {
     public int rowNumber, colNumber;
 
     public int chunkedRowNumber, chunkedColNum;
@@ -22,7 +24,7 @@ public class Cell {
 
     volatile double temperature;
 
-    public Cell(){
+    public ServerCell(){
     }
 
     /**
@@ -30,7 +32,7 @@ public class Cell {
      * @param rowNumber X-coordinate in grid.
      * @param colNumber Y-coordinate in grid.
      */
-    public Cell(int rowNumber, int colNumber) {
+    public ServerCell(int rowNumber, int colNumber) {
         this.rowNumber = rowNumber;
         this.colNumber = colNumber;
         this.temperature = 0;
@@ -54,7 +56,7 @@ public class Cell {
      * Copy a cell.
      * @param cell The cell to be copied.
      */
-    public Cell(Cell cell) {
+    public ServerCell(ServerCell cell) {
         this.rowNumber = cell.rowNumber;;
         this.colNumber = cell.colNumber;
         this.temperature = cell.temperature;
@@ -69,13 +71,13 @@ public class Cell {
      * @param cellsToClone  What it says on the tin.
      * @return
      */
-    public static Cell[][] cloneCellBlock(Cell[][] cellsToClone) {
-        Cell[][] clones = new Cell[cellsToClone.length][cellsToClone[0].length];
+    public static ServerCell[][] cloneCellBlock(ServerCell[][] cellsToClone) {
+        ServerCell[][] clones = new ServerCell[cellsToClone.length][cellsToClone[0].length];
 
         for(int rowNum = 0; rowNum < cellsToClone.length; rowNum++) {
             for(int colNum = 0; colNum < cellsToClone[0].length; colNum++) {
                 if(cellsToClone[rowNum][colNum] == null) continue;
-                clones[rowNum][colNum] = new Cell(cellsToClone[rowNum][colNum]);
+                clones[rowNum][colNum] = new ServerCell(cellsToClone[rowNum][colNum]);
             }
         }
 
@@ -87,84 +89,44 @@ public class Cell {
      * @param cellsToClone  What it says on the tin.
      * @return
      */
-    public static Cell[] cloneCellLine(Cell[] cellsToClone) {
-        Cell[] clones = new Cell[cellsToClone.length];
+    public static ServerCell[] cloneCellLine(ServerCell[] cellsToClone) {
+        ServerCell[] clones = new ServerCell[cellsToClone.length];
 
         for(int colNum = 0; colNum < cellsToClone.length; colNum++) {
-            clones[colNum] = new Cell(cellsToClone[colNum]);
+            clones[colNum] = new ServerCell(cellsToClone[colNum]);
         }
 
         return clones;
     }
 
-    public static Cell[][] cloneCellBlockForWrite(Cell[][] cellsToClone) {
+    public static ServerCell[][] cloneCellBlockForWrite(ServerCell[][] cellsToClone) {
         int cloneRows = 0;
 
         for(int rowNum = 0; rowNum < cellsToClone.length; rowNum++) {
             if(cellsToClone[rowNum][0] != null && !cellsToClone[rowNum][0].doNotCalculate) cloneRows++;
         }
 
-        Cell[][] clones = new Cell[cloneRows + 1][cellsToClone[0].length];
+        ServerCell[][] clones = new ServerCell[cloneRows + 1][cellsToClone[0].length];
 
         for(int rowNum = 0; rowNum < cellsToClone.length; rowNum++) {
             for(int colNum = 0; colNum < cellsToClone[0].length; colNum++) {
                 if(cellsToClone[rowNum][colNum] == null || cellsToClone[rowNum][colNum].doNotCalculate) continue;
-                clones[rowNum][colNum] = new Cell(cellsToClone[rowNum][colNum]);
+                clones[rowNum][colNum] = new ServerCell(cellsToClone[rowNum][colNum]);
             }
         }
 
         return clones;
     }
 
-    /**
-     * Calculate a new temperature based on provided neighbors.
-     */
-    public void calculateNewTemperature(ArrayList<Cell> neighbors, Grid writeGrid, double[] metalConstants, double S, double T) {
-        //Don't update if these two cells are the ones where heat is applied.
-        if(this.isHeatSource) {
-            double heatSourceTemp = S;
-            if(rowNumber == 0) heatSourceTemp = T;
-            double fluctuation = ThreadLocalRandom.current().nextDouble(.25);
-            boolean coinFlip = ThreadLocalRandom.current().nextBoolean();
-
-            if(coinFlip) {
-                writeGrid.Cells[this.rowNumber][this.colNumber].temperature = heatSourceTemp + fluctuation;
-                return;
-            } else {
-                writeGrid.Cells[this.rowNumber][this.colNumber].temperature = heatSourceTemp - fluctuation;
-                return;
-            }
-
-        }
-
-        //Loop through our metals and aggregate the temperature percentage calculation
-        double resultTemp = 0;
-
-        for(int metalNumber = 0; metalNumber < metalConstants.length; metalNumber++) {
-            double neighborResult = 0;
-
-            for(Cell neighbor: neighbors) {
-                neighborResult += neighbor.temperature * neighbor.metalPercentages[metalNumber];
-            }
-
-            resultTemp += metalConstants[metalNumber] * (neighborResult / neighbors.size());
-        }
-
-        //We update the temp of the corresponding cell in the WRITE GRID,
-        //NOT our local temp.
-        writeGrid.Cells[this.rowNumber][this.colNumber].temperature = resultTemp;
-
-        if(resultTemp > Main.highestTemp) Main.highestTemp = resultTemp;
-    }
 
     /**
      * Calculate a new temperature based on provided neighbors.  Used in a local write grid.
      */
-    public void calculateNewTemperaturePartialWriteGrid(ArrayList<Cell> neighbors, Grid writeGrid, double[] metalConstants) {
+    public void calculateNewTemperaturePartialWriteGrid(ArrayList<ServerCell> neighbors, ServerGrid writeGrid, double[] metalConstants, double S, double T) {
         //Don't update if these two cells are the ones where heat is applied.
         if(this.isHeatSource) {
-            double heatSourceTemp = Main.T;
-            if(rowNumber == 0) heatSourceTemp = Main.S;
+            double heatSourceTemp = T;
+            if(rowNumber == 0) heatSourceTemp = S;
             double fluctuation = ThreadLocalRandom.current().nextDouble(.25);
             boolean coinFlip = ThreadLocalRandom.current().nextBoolean();
 
@@ -184,7 +146,7 @@ public class Cell {
         for(int metalNumber = 0; metalNumber < metalConstants.length; metalNumber++) {
             double neighborResult = 0;
 
-            for(Cell neighbor: neighbors) {
+            for(ServerCell neighbor: neighbors) {
                 neighborResult += neighbor.temperature * neighbor.metalPercentages[metalNumber];
             }
 

@@ -12,13 +12,17 @@ public class Worker extends RecursiveAction {
 
     final double[] metalConstants;
 
+    final double T, S;
+
     //int threshold;
 
-    public Worker(Cell[][] cells, Grid readGrid, Grid writeGrid, double C1, double C2, double C3) {
+    public Worker(Cell[][] cells, Grid readGrid, Grid writeGrid, double C1, double C2, double C3, double S, double T) {
         this.cells = cells;
         this.readGrid = readGrid;
         this.writeGrid = writeGrid;
-        metalConstants = new double[]{C1, C2, C3};
+        this.metalConstants = new double[]{C1, C2, C3};
+        this.T = T;
+        this.S = S;
     }
 
     @Override
@@ -50,10 +54,10 @@ public class Worker extends RecursiveAction {
             }
 
             invokeAll(
-                    new Worker(firstQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2]),
-                    new Worker(secondQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2]),
-                    new Worker(thirdQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2]),
-                    new Worker(fourthQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2])
+                    new Worker(firstQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], S, T),
+                    new Worker(secondQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], S, T),
+                    new Worker(thirdQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], S, T),
+                    new Worker(fourthQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], S, T)
             );
 
         } else {
@@ -91,7 +95,7 @@ public class Worker extends RecursiveAction {
                         neighbors.add(Main.readGrid.Cells[cell.rowNumber][cell.colNumber + 1]);
                     }
 
-                    cell.calculateNewTemperature(neighbors, this.writeGrid, this.metalConstants);
+                    cell.calculateNewTemperature(neighbors, this.writeGrid, this.metalConstants, S, T);
                 }
             }
         }
