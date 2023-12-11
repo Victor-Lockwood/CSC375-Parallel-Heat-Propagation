@@ -12,13 +12,16 @@ public class NetworkWorker extends RecursiveAction {
 
     final double[] metalConstants;
 
+    int offset = 0;
+
     //int threshold;
 
-    public NetworkWorker(Cell[][] cells, Grid readGrid, Grid writeGrid, double C1, double C2, double C3) {
+    public NetworkWorker(Cell[][] cells, Grid readGrid, Grid writeGrid, double C1, double C2, double C3, int offset) {
         this.cells = cells;
         this.readGrid = readGrid;
         this.writeGrid = writeGrid;
         metalConstants = new double[]{C1, C2, C3};
+        this.offset = offset;
     }
 
     @Override
@@ -50,10 +53,10 @@ public class NetworkWorker extends RecursiveAction {
             }
 
             invokeAll(
-                    new NetworkWorker(firstQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2]),
-                    new NetworkWorker(secondQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2]),
-                    new NetworkWorker(thirdQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2]),
-                    new NetworkWorker(fourthQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2])
+                    new NetworkWorker(firstQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset),
+                    new NetworkWorker(secondQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset),
+                    new NetworkWorker(thirdQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset),
+                    new NetworkWorker(fourthQuarter, this.readGrid, this.writeGrid, metalConstants[0], metalConstants[1], metalConstants[2], this.offset)
             );
 
         } else {

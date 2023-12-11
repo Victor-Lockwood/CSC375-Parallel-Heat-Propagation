@@ -95,28 +95,20 @@ public class Main {
             int numServers = 3;
             int numRows = readGrid.Cells.length;
 
-            ArrayList<Cell[][]> serverChunks = new ArrayList<Cell[][]>();
-
-            //Break the read grid into chunks
-            for(int serverNum = 0; serverNum < numServers; serverNum++) {
-                int offset = serverNum * (numRows / numServers);
-
-                Cell[][] serverChunk = NetworkHandler.getServerChunk(numServers, readGrid, offset);
-                serverChunks.add(serverChunk);
-            }
 
             ForkJoinPool fjp = ForkJoinPool.commonPool();
 
             for(int i = 0; i < threshold; i++) {
 
-                ArrayList<Worker> workers = new ArrayList<>();
+                for(int serverNum = 0; serverNum < numServers; serverNum++) {
+                    int offset = serverNum * (numRows / numServers);
 
-                for(int j = 0; j < serverChunks.size(); j++) {
-                    Cell[][] chunkCells = serverChunks.get(j);
+                    Cell[][] serverChunk = NetworkHandler.getServerChunk(numServers, readGrid, offset);
+
                     Grid localReadGrid = new Grid();
-                    localReadGrid.Cells = chunkCells;
+                    localReadGrid.Cells = serverChunk;
 
-                    Worker worker = new Worker(chunkCells, readGrid, writeGrid, C1, C2, C3);
+                    NetworkWorker worker = new NetworkWorker(serverChunk, readGrid, writeGrid, C1, C2, C3, offset);
 
                     fjp.invoke(worker);
                 }
