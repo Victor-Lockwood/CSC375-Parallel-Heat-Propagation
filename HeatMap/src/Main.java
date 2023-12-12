@@ -3,10 +3,7 @@ import Server.ServerGrid;
 
 import javax.swing.*;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class Main {
 
@@ -74,7 +71,7 @@ public class Main {
      * Specs: https://gee.cs.oswego.edu/dl/csc375/a3V2.html
      * @param args
      */
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
         setInputVars(args);
 
         readGrid = new Grid(height, width);
@@ -102,9 +99,11 @@ public class Main {
             int numServers = 3;
             int numRows = readGrid.Cells.length;
 
-            ArrayList<ClientWorker> workers = new ArrayList<>();
+
+            ExecutorService executorService = Executors.newFixedThreadPool(NCPUS);
 
             for(int i = 0; i < threshold; i++) {
+                ArrayList<ClientWorker> workers = new ArrayList<>();
 
                 for(int serverNum = 0; serverNum < numServers; serverNum++) {
                     String hostName = "127.0.0.1";
@@ -132,15 +131,21 @@ public class Main {
 
                 }
 
-                ExecutorService executorService = Executors.newFixedThreadPool(NCPUS);
+                CountDownLatch countDownLatch = new CountDownLatch(workers.size());
 
+
+
+//                ExecutorService executorService = Executors.newFixedThreadPool(NCPUS);
+//
                 for(ClientWorker worker: workers) {
+                    worker.countDownLatch = countDownLatch;
                     executorService.submit(worker);
                 }
+//
+//                executorService.awaitTermination(1, TimeUnit.SECONDS);
 
-                executorService.awaitTermination(2, TimeUnit.SECONDS);
+                countDownLatch.await();
 
-                //fjp.awaitQuiescence(2, TimeUnit.SECONDS);
 
                 for(ClientWorker worker: workers) {
                     if(worker.returnedGrid == null) continue;
