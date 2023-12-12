@@ -106,7 +106,7 @@ public class Main {
                 ArrayList<ClientWorker> workers = new ArrayList<>();
 
                 for(int serverNum = 0; serverNum < numServers; serverNum++) {
-                    String hostName = "127.0.0.1";
+                    String hostName = "127.0.0.1"; //"moxie.cs.oswego.edu"; //
                     int portNumber = 26880 + serverNum;
 
                     int offset = serverNum * (numRows / numServers);
@@ -123,26 +123,14 @@ public class Main {
                     Server.NetworkObject networkObject = new Server.NetworkObject(serverChunk, localReadGrid, localWriteGrid, C1, C2, C3, offset, S, T);
                     workers.add(new ClientWorker(networkObject, portNumber, hostName));
 
-//                    NetworkWorker worker = new NetworkWorker(networkObject);
-//                    workers.add(worker);
-//
-//                    fjp.invoke(worker);
-
-
                 }
 
                 CountDownLatch countDownLatch = new CountDownLatch(workers.size());
 
-
-
-//                ExecutorService executorService = Executors.newFixedThreadPool(NCPUS);
-//
                 for(ClientWorker worker: workers) {
                     worker.countDownLatch = countDownLatch;
                     executorService.submit(worker);
                 }
-//
-//                executorService.awaitTermination(1, TimeUnit.SECONDS);
 
                 countDownLatch.await();
 
@@ -163,7 +151,7 @@ public class Main {
                 writeGrid = swapGrid;
 
                 //Too fast otherwise!
-                Thread.sleep(10);
+                Thread.sleep(100);
             }
 
             return;
