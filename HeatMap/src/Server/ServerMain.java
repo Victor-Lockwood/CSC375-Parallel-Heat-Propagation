@@ -13,7 +13,7 @@ public class ServerMain {
         int port = Integer.parseInt(args[0]);
         ServerSocket ss = new ServerSocket(port);
 
-        System.out.println("Accepting crap on port " + port);
+        System.out.println("Accepting connection on port " + port);
         ForkJoinPool fjp = ForkJoinPool.commonPool();
 
         while(true) {

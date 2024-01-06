@@ -101,7 +101,7 @@ public class ServerCell implements Serializable {
     }
 
     public static ServerCell[][] cloneCellBlockForWrite(ServerCell[][] cellsToClone) {
-        int cloneRows = 0;
+        int cloneRows = 1;
 
         for(int rowNum = 0; rowNum < cellsToClone.length; rowNum++) {
             if(cellsToClone[rowNum][0] != null && !cellsToClone[rowNum][0].doNotCalculate) cloneRows++;

@@ -106,13 +106,16 @@ public class Main {
                 ArrayList<ClientWorker> workers = new ArrayList<>();
 
                 for(int serverNum = 0; serverNum < numServers; serverNum++) {
-                    String hostName = "127.0.0.1"; //"moxie.cs.oswego.edu"; //
+                    String hostName = "127.0.0.1"; //
                     int portNumber = 26880 + serverNum;
 
                     int offset = serverNum * (numRows / numServers);
                     if(offset != 0) offset -= 1;
 
-                    ServerCell[][] serverChunk = Chunker.getServerChunk(numServers, readGrid, offset);
+                    boolean isLast = false;
+                    if(serverNum + 1 == numServers) isLast = true;
+
+                    ServerCell[][] serverChunk = Chunker.getServerChunk(numServers, readGrid, offset, isLast);
 
                     ServerGrid localReadGrid = new ServerGrid();
                     localReadGrid.Cells = serverChunk;
@@ -168,7 +171,7 @@ public class Main {
      */
     private static void setInputVars(String[] args) {
         if(args.length < 7) {
-            System.out.println("Should have 7 integer arguments.");
+            System.out.println("Should have 7 double arguments.");
             System.exit(1);
         }
 
