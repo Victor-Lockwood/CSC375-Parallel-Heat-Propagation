@@ -29,23 +29,23 @@ The program takes up to 9 arguments.
 
 In order:
 
-S - Double. Temp to heat top left corner in degrees Celsius.
+- S - Double. Temp to heat top left corner in degrees Celsius.
 
-T - Double. Temp to heat bottom right corner in degrees Celsius. 
+- T - Double. Temp to heat bottom right corner in degrees Celsius. 
 
-C1 - Double. Thermal constant for metal 1.
+- C1 - Double. Thermal constant for metal 1.
             
-C2 - Double. Thermal constant for metal 2.
+- C2 - Double. Thermal constant for metal 2.
             
-C3 - Double. Thermal constant for metal 3.
+- C3 - Double. Thermal constant for metal 3.
             
-height - Integer. Height of grid.
+- height - Integer. Height of grid.
 
-threshold - Integer. When to stop iterating.
+- threshold - Integer. When to stop iterating.
 
-debug - (Optional) Boolean. Print debug statistics during data load.
+- debug - (Optional) Boolean. Print debug statistics during data load.
 
-network - (Optional) Boolean. Whether to use networked mode (Part B).  Requires 3 running servers.
+- network - (Optional) Boolean. Whether to use networked mode (Part B).  Requires 3 running servers.
 
 
 ### Example Valid Arguments
@@ -64,7 +64,7 @@ and alloy compositions of its neighbors.  The new temperatures get written to th
 in other words, the previous read grid is the new write grid and vice versa - and the process is started again
 until a specified number of iterations is reached.  A GUI displays the current read grid every so many milliseconds.
 
-## Part 2
+## Part B
 I chose networking for this part, which utilizes 3 instances of running server code (these can run locally).
 A corresponding worker on the client side handles communication with its designated server, which is
 tracked and executed using a [CountDownLatch](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CountDownLatch.html) and [ExecutorService](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ExecutorService.html).  You could also use a [Phaser](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Phaser.html) instead of a latch.
