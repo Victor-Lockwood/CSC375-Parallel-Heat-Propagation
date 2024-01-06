@@ -51,6 +51,9 @@ In order:
 ### Example Valid Arguments
 `100 500 1 .75 1.25 40 10000 true false`
 
+Here's what the grid looks like with these arguments after convergence:
+![](converged.png)
+(NOTE: I didn't actually run this on Windows XP, I just have a really cool theme on Ubuntu.)
 
 ## Part A
 The project accomplishes the heat propagation simulation by using divide-and-conquer methods, breaking
